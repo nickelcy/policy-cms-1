@@ -1,0 +1,10 @@
+services:
+  policy-cms-web:
+    image: nginx:alpine
+    container_name: policy-cms-web
+    restart: unless-stopped
+    ports:
+      - "8088:80"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./deploy/nginx.default.conf:/etc/nginx/conf.d/default.conf:ro
