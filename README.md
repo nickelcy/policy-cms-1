@@ -80,6 +80,7 @@ The application will be available at `http://localhost:5173` (or the port shown 
 ## API Integration
 
 This application integrates with the DSpace REST API. For detailed API documentation, see [docs/dspace-api.md](./docs/dspace-api.md).
+For endpoint-to-code usage mapping, see [docs/endpoints-usage.md](./docs/endpoints-usage.md).
 
 ### Key Endpoints
 

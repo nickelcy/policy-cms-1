@@ -1,5 +1,7 @@
 # DSpace API Documentation
 
+For endpoint-to-code mapping, see: [Endpoints Usage in Policy CMS](./endpoints-usage.md)
+
 ## Overview
 
 This document describes the DSpace REST API integration for the Policy CMS application. The production API is hosted at:

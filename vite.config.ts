@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true, // Listen on all addresses
-    allowedHosts: ['ugpolicies.nickelcy.com'],
+    allowedHosts: ['policy.nickelcy.com'],
+    hmr: false,
   },
   resolve: {
     alias: {

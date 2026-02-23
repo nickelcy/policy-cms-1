@@ -6,25 +6,24 @@ import { Link, Route, Routes } from 'react-router-dom'
 import { FiMenu, FiSearch, FiX } from 'react-icons/fi'
 import axios from 'axios'
 import AboutPage from '@/pages/about'
+import Suggest from '@/components/element/suggest'
 
 const API_HOST = (import.meta.env.VITE_API_HOST ?? '').replace(/\/$/, '')
 const SEARCH_ENDPOINT = '/server/api/discover/search/objects'
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [activeQuery, setActiveQuery] = useState<string>('')
   const [apiResponse, setApiResponse] = useState<Record<string, unknown> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [requestError, setRequestError] = useState<string | null>(null)
 
   const handleSearch = () => {
-    if (searchQuery.trim()) {
-      // TODO: Implement search functionality
-      console.log('Searching for:', searchQuery)
-    }
+    setActiveQuery(searchQuery.trim())
   }
 
   useEffect(() => {
-    const query = searchQuery.trim()
+    const query = activeQuery.trim()
 
     if (!query) {
       setApiResponse(null)
@@ -48,8 +47,13 @@ function HomePage() {
         const response = await axios.get(`${API_HOST}${SEARCH_ENDPOINT}`, {
           params: {
             query,
+            page: 0,
             size: 5,
-            sort: 'score,DESC',
+            sort: 'dc.date.accessioned,DESC',
+            scope: '7e5c02a9-d75c-48c4-becd-03b395bd25f3',
+            embed: 'thumbnail',
+            dsoType: 'ITEM',
+            'f.original_bundle_filenames': '.pdf,contains',
           },
           signal: controller.signal,
         })
@@ -69,7 +73,7 @@ function HomePage() {
     fetchSearchResults()
 
     return () => controller.abort()
-  }, [searchQuery])
+  }, [activeQuery])
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -89,15 +93,21 @@ function HomePage() {
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
-        <div className="flex items-center gap-2 border border-input rounded-full bg-background shadow-sm hover:shadow-md transition-shadow focus-within:shadow-md focus-within:ring-2 focus-within:ring-ring">
+      <div className="relative space-y-2">
+        <div className="px-4 flex items-center gap-2 border border-input rounded-full bg-background shadow-sm hover:shadow-md transition-shadow focus-within:shadow-md focus-within:ring-1 focus-within:ring-primary/25">
           <Input
             type="text"
             placeholder="Search policies..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const nextValue = e.target.value
+              setSearchQuery(nextValue)
+              if (!nextValue.trim()) {
+                setActiveQuery('')
+              }
+            }}
             onKeyDown={handleKeyPress}
-            className="flex-1 border-0 rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 h-14 text-base px-6"
+            className="flex-1 border-0 rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 h-14 text-base px-6 pr-0"
           />
           <Button
             onClick={handleSearch}
@@ -108,23 +118,17 @@ function HomePage() {
             <FiSearch className="h-5 w-5" />
           </Button>
         </div>
+      {/* Search Results */}
+        {isLoading && (
+          <p className="text-sm text-muted-foreground ms-12">Searching...</p>
+        )}
+        {requestError && <p className="text-sm text-destructive m-0">{requestError}</p>}
+        {!isLoading && !requestError && (
+          <Suggest query={activeQuery} apiResponse={apiResponse} />
+        )}
+      {/* </div> */}
       </div>
 
-      {/* Search Results */}
-      <div className="ml-10 flex flex-col gap-8">
-        <p className="">
-          {searchQuery ?  <span className="text-muted-foreground">{searchQuery} - Search Repository</span> : <span></span>}
-         </p>
-        {isLoading && (
-          <p className="text-sm text-muted-foreground">Fetching results...</p>
-        )}
-        {requestError && <p className="text-sm text-destructive">{requestError}</p>}
-        {apiResponse !== null && !isLoading && !requestError && (
-          <pre className="max-h-72 overflow-auto rounded-md border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
-            {JSON.stringify(apiResponse, null, 2)}
-          </pre>
-        )}
-      </div>
     </div>
   )
 }
