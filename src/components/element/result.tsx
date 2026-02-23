@@ -9,7 +9,10 @@ import { Button } from '@/components/ui/button'
 
 const API_HOST = (import.meta.env.VITE_API_HOST ?? '').replace(/\/$/, '')
 const SEARCH_ENDPOINT = '/server/api/discover/search/objects'
-const PAGE_SIZE = 2
+const SEARCH_SORT = import.meta.env.VITE_SEARCH_SORT ?? 'dc.date.accessioned,DESC'
+const DSPACE_SCOPE_UUID = import.meta.env.VITE_DSPACE_SCOPE_UUID ?? ''
+const PAGE_SIZE = Number.parseInt(import.meta.env.VITE_RESULTS_PAGE_SIZE ?? '15', 10)
+const RECENT_RECOMMENDATION_SIZE = Number.parseInt(import.meta.env.VITE_RECENT_RECOMMENDATION_SIZE ?? '5', 10)
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
@@ -254,6 +257,9 @@ const getPageWindow = (currentPage: number, totalPages: number): number[] => {
   return pages
 }
 
+const sanitizePositiveInt = (value: number, fallback: number): number =>
+  Number.isFinite(value) && value > 0 ? value : fallback
+
 function ResultPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -300,9 +306,9 @@ function ResultPage() {
           params: {
             query: currentQuery,
             page: currentPage - 1,
-            size: PAGE_SIZE,
-            sort: 'dc.date.accessioned,DESC',
-            scope: '7e5c02a9-d75c-48c4-becd-03b395bd25f3',
+            size: sanitizePositiveInt(PAGE_SIZE, 15),
+            sort: SEARCH_SORT,
+            scope: DSPACE_SCOPE_UUID,
             embed: 'thumbnail',
             dsoType: 'ITEM',
             'f.original_bundle_filenames': '.pdf,contains',
@@ -348,9 +354,9 @@ function ResultPage() {
           params: {
             query: '*',
             page: 0,
-            size: 5,
-            sort: 'dc.date.accessioned,DESC',
-            scope: '7e5c02a9-d75c-48c4-becd-03b395bd25f3',
+            size: sanitizePositiveInt(RECENT_RECOMMENDATION_SIZE, 5),
+            sort: SEARCH_SORT,
+            scope: DSPACE_SCOPE_UUID,
             embed: 'thumbnail',
             dsoType: 'ITEM',
             'f.original_bundle_filenames': '.pdf,contains',
@@ -358,7 +364,7 @@ function ResultPage() {
           signal: controller.signal,
         })
 
-        const recommendedObjects = extractObjects(response.data).slice(0, 5)
+        const recommendedObjects = extractObjects(response.data).slice(0, sanitizePositiveInt(RECENT_RECOMMENDATION_SIZE, 5))
         setRecentRecommendations(recommendedObjects)
       } catch (error) {
         if (axios.isAxiosError(error) && error.code === 'ERR_CANCELED') {

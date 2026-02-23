@@ -11,10 +11,14 @@ import ResultPage from '@/components/element/result'
 
 const API_HOST = (import.meta.env.VITE_API_HOST ?? '').replace(/\/$/, '')
 const SEARCH_ENDPOINT = '/server/api/discover/search/objects'
+const SEARCH_SORT = import.meta.env.VITE_SEARCH_SORT ?? 'dc.date.accessioned,DESC'
+const DSPACE_SCOPE_UUID = import.meta.env.VITE_DSPACE_SCOPE_UUID ?? ''
+const SUGGESTION_PAGE_SIZE = Number.parseInt(import.meta.env.VITE_SUGGESTION_PAGE_SIZE ?? '5', 10)
 
 function HomePage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [apiResponse, setApiResponse] = useState<Record<string, unknown> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [requestError, setRequestError] = useState<string | null>(null)
@@ -56,9 +60,9 @@ function HomePage() {
           params: {
             query,
             page: 0,
-            size: 5,
-            sort: 'dc.date.accessioned,DESC',
-            scope: '7e5c02a9-d75c-48c4-becd-03b395bd25f3',
+            size: Number.isFinite(SUGGESTION_PAGE_SIZE) && SUGGESTION_PAGE_SIZE > 0 ? SUGGESTION_PAGE_SIZE : 5,
+            sort: SEARCH_SORT,
+            scope: DSPACE_SCOPE_UUID,
             embed: 'thumbnail',
             dsoType: 'ITEM',
             'f.original_bundle_filenames': '.pdf,contains',
@@ -90,9 +94,15 @@ function HomePage() {
   }
 
   return (
-    <div className="w-full max-w-2xl space-y-8">
+    <div className={`w-full max-w-2xl space-y-4 ${isSearchFocused ? 'mt-0' : 'mt-16'} transition-[margin] duration-500 ease-out`}>
       {/* Title */}
-      <div className="text-center space-y-2">
+      <div
+        className={`text-center space-y-2 overflow-hidden transition-[opacity,transform,max-height,margin] duration-500 ease-out ${
+          isSearchFocused
+            ? 'opacity-0 -translate-y-1 max-h-0 mb-0 pointer-events-none'
+            : 'opacity-100 translate-y-0 max-h-32 mb-3'
+        }`}
+      >
         <h1 className="text-5xl font-normal text-foreground">
           <span className="text-primary">Policy</span>{' '}
           <span className="text-secondary">Search</span>
@@ -106,10 +116,19 @@ function HomePage() {
           <Input
             type="text"
             placeholder="Search policies..."
+            name='policy-search'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyPress}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
             className="flex-1 border-0 rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 h-14 text-base px-6 pr-0"
+            autoCorrect='off'
+            autoComplete='off'
+            spellCheck={false}
+            enterKeyHint='search'
+            autoCapitalize='none'
+            inputMode='text'
           />
           <Button
             onClick={handleSearch}
@@ -214,7 +233,7 @@ function App() {
       )}
 
       {/* Main Search Area */}
-      <main className={isResultsPage ? 'flex-1' : 'flex-1 flex items-start justify-center px-4 py-12 mt-16'}>
+      <main className={isResultsPage ? 'flex-1' : 'flex-1 flex items-start justify-center px-4 py-6 mt-16'}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
