@@ -463,3 +463,4 @@ function Suggest({ query, apiResponse }: SuggestProps) {
 }
 
 export default Suggest
+// The above code defines a React component named `Suggest` that takes in a search query and an API response. It processes the API response to extract relevant information about search results, including titles, abstracts, types, years, thumbnails, and PDF links. The component then renders a list of search results with their associated metadata and provides links to the PDFs when available.
