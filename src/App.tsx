@@ -13,17 +13,14 @@ const SEARCH_ENDPOINT = '/server/api/discover/search/objects'
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [activeQuery, setActiveQuery] = useState<string>('')
   const [apiResponse, setApiResponse] = useState<Record<string, unknown> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [requestError, setRequestError] = useState<string | null>(null)
 
-  const handleSearch = () => {
-    setActiveQuery(searchQuery.trim())
-  }
+  const handleSearch = () => {}
 
   useEffect(() => {
-    const query = activeQuery.trim()
+    const query = searchQuery.trim()
 
     if (!query) {
       setApiResponse(null)
@@ -73,11 +70,11 @@ function HomePage() {
     fetchSearchResults()
 
     return () => controller.abort()
-  }, [activeQuery])
+  }, [searchQuery])
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleSearch()
+      return
     }
   }
 
@@ -99,13 +96,7 @@ function HomePage() {
             type="text"
             placeholder="Search policies..."
             value={searchQuery}
-            onChange={(e) => {
-              const nextValue = e.target.value
-              setSearchQuery(nextValue)
-              if (!nextValue.trim()) {
-                setActiveQuery('')
-              }
-            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyPress}
             className="flex-1 border-0 rounded-full focus-visible:ring-0 focus-visible:ring-offset-0 h-14 text-base px-6 pr-0"
           />
@@ -124,7 +115,7 @@ function HomePage() {
         )}
         {requestError && <p className="text-sm text-destructive m-0">{requestError}</p>}
         {!isLoading && !requestError && (
-          <Suggest query={activeQuery} apiResponse={apiResponse} />
+          <Suggest query={searchQuery} apiResponse={apiResponse} />
         )}
       {/* </div> */}
       </div>
