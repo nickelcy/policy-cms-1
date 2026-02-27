@@ -434,9 +434,9 @@ function Suggest({ query, apiResponse }: SuggestProps) {
                     Type: {info.type ?? 'N/A'}
                   </p>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
+                {/* <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
                   {info.abstractText ?? ''}
-                </p>
+                </p> */}
               </div>
             </div>
           </article>

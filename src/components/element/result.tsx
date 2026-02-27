@@ -726,12 +726,11 @@ function ResultPage() {
                         </p>
                       )}
 
-                      <p className="mt-1 break-all text-sm text-blue-700">
+                      {/* <p className="mt-1 break-all text-sm text-blue-700">
                         {displayUrl}
-                      </p>
+                      </p> */}
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Type: {info.type ?? 'N/A'} | Year: {info.year ?? 'N/A'} | Handle:{' '}
-                        {info.handle ?? 'N/A'}
+                        Type: {info.type ?? 'N/A'} | Year: {info.year ?? 'N/A'} 
                       </p>
                       <p className="mt-2 text-sm text-muted-foreground">
                         {info.abstractText ?? 'No abstract available.'}
